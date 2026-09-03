@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
 import re, shutil, subprocess, sys, tempfile, zipfile
+import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parent.parent
 META = ROOT / "docs" / "export-metadata.yaml"
@@ -45,23 +46,52 @@ def validate(md_files):
         raise SystemExit("Validering misslyckades:\n- " + "\n- ".join(errors))
 
 
+def validate_epub_xml(temp):
+    required_xml = [
+        next(temp.rglob("*.opf"), None),
+        next(temp.rglob("nav.xhtml"), None),
+        temp / "META-INF" / "container.xml",
+    ]
+    for xml_file in required_xml:
+        if not xml_file or not xml_file.exists():
+            raise SystemExit("EPUB-kontroll misslyckades: obligatorisk XML-fil saknas")
+        try:
+            ET.parse(xml_file)
+        except ET.ParseError as exc:
+            raise SystemExit(f"EPUB-kontroll misslyckades: ogiltig XML i {xml_file.relative_to(temp)}: {exc}") from exc
+
+
 def postprocess_epub(path):
     temp = Path(tempfile.mkdtemp())
     try:
-        with zipfile.ZipFile(path, 'r') as z: z.extractall(temp)
+        with zipfile.ZipFile(path, 'r') as z:
+            z.extractall(temp)
         opf = next(temp.rglob("*.opf"), None)
         nav = next(temp.rglob("nav.xhtml"), None)
         if not opf or not nav:
             raise SystemExit("EPUB-kontroll misslyckades: nav.xhtml eller OPF saknas")
+
         text = opf.read_text(encoding="utf-8")
         nav_ids = re.findall(r'<item[^>]+id="([^"]+)"[^>]+properties="[^"]*nav[^"]*"', text)
-        for nav_id in nav_ids:
-            text = re.sub(rf'(<itemref[^>]+idref="{re.escape(nav_id)}"[^>]*)(/?>)', lambda m: m.group(1) + (' linear="no"' if 'linear=' not in m.group(1) else '') + m.group(2), text)
+
+        def mark_nav_non_linear(match):
+            attrs = match.group(1)
+            idref = re.search(r'\bidref="([^"]+)"', attrs)
+            if not idref or idref.group(1) not in nav_ids or re.search(r'\blinear=', attrs):
+                return match.group(0)
+            return f'<itemref{attrs} linear="no" />'
+
+        text = re.sub(r'<itemref([^>]*)\s*/>', mark_nav_non_linear, text)
         opf.write_text(text, encoding="utf-8")
+
+        # Fail the build before publishing if post-processing produced malformed EPUB XML.
+        validate_epub_xml(temp)
+
         rebuilt = path.with_suffix('.tmp.epub')
         with zipfile.ZipFile(rebuilt, 'w') as z:
             mimetype = temp / 'mimetype'
-            if mimetype.exists(): z.write(mimetype, 'mimetype', compress_type=zipfile.ZIP_STORED)
+            if mimetype.exists():
+                z.write(mimetype, 'mimetype', compress_type=zipfile.ZIP_STORED)
             for f in sorted(temp.rglob('*')):
                 if f.is_file() and f != mimetype:
                     z.write(f, f.relative_to(temp).as_posix(), compress_type=zipfile.ZIP_DEFLATED)
