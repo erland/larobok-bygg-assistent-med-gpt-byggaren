@@ -29,7 +29,8 @@ jobs:
             pandoc \
             texlive-xetex \
             texlive-latex-extra \
-            texlive-fonts-recommended
+            texlive-fonts-recommended \
+            lmodern
 
       - name: Build PDF and EPUB
         run: ./scripts/export-book.sh
