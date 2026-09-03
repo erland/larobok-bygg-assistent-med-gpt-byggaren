@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+exports/.book-build.md
+exports/.pdf-header-build.tex

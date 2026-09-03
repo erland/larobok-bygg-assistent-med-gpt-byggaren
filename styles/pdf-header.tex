@@ -1,0 +1,75 @@
+% Typography and layout for the PDF edition.
+\usepackage[a4paper,margin=25mm,headheight=14pt]{geometry}
+\usepackage{titlesec}
+\usepackage[most]{tcolorbox}
+\usepackage{enumitem}
+\usepackage{fvextra}
+\usepackage{etoolbox}
+\usepackage{microtype}
+\usepackage{needspace}
+\usepackage{graphicx}
+
+% Compact, book-like paragraph rhythm.
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+\setlist{topsep=0.35em,itemsep=0.15em,parsep=0pt}
+\renewcommand{\arraystretch}{1.22}
+
+% Each H1 is a real chapter start without adding automatic LaTeX chapter numbering.
+\newcommand{\sectionbreak}{\clearpage}
+\titleformat{\section}[display]
+  {\centering\bfseries\fontsize{24}{29}\selectfont}
+  {}{0pt}{}
+\titlespacing*{\section}{0pt}{0.08\textheight}{1.6em}
+\titleformat{\subsection}
+  {\bfseries\fontsize{15}{18}\selectfont}
+  {}{0pt}{}
+\titlespacing*{\subsection}{0pt}{1.7em}{0.55em}
+\titleformat{\subsubsection}
+  {\bfseries\fontsize{12}{14}\selectfont}
+  {}{0pt}{}
+\titlespacing*{\subsubsection}{0pt}{1.25em}{0.4em}
+
+% Prompt/example blocks: visually distinct but deliberately restrained.
+\let\oldquote\quote
+\let\endoldquote\endquote
+\RenewDocumentEnvironment{quote}{}%
+{\begin{tcolorbox}[breakable,boxrule=0pt,leftrule=1.1pt,arc=0pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,before skip=0.9em,after skip=0.9em,
+  colback=black!2,colframe=black!42]}%
+{\end{tcolorbox}}
+
+% Long code/text blocks may wrap instead of running out of the page.
+\DefineVerbatimEnvironment{verbatim}{Verbatim}{breaklines=true,breakanywhere=true,
+  frame=single,framesep=5pt,fontsize=\small}
+
+% Keep headings with the text that follows when possible.
+\makeatletter
+\pretocmd{\subsection}{\needspace{4\baselineskip}}{}{}
+\pretocmd{\subsubsection}{\needspace{3\baselineskip}}{}{}
+\makeatother
+
+% A proper standalone title page with subtitle separated from the main title.
+\makeatletter
+\providecommand{\@subtitle}{}
+\providecommand{\subtitle}[1]{\gdef\@subtitle{#1}}
+\renewcommand{\maketitle}{%
+  \begin{titlepage}
+    \thispagestyle{empty}
+    \ifdefined\BookCoverImage
+      \newgeometry{margin=0pt}
+      \noindent\includegraphics[width=\paperwidth,height=\paperheight,keepaspectratio]{\BookCoverImage}%
+      \restoregeometry
+    \else
+      \centering
+      \vspace*{0.24\textheight}
+      {\bfseries\fontsize{27}{33}\selectfont \@title\par}
+      \vspace{1.6em}
+      {\large \@subtitle\par}
+      \vspace{2.8em}
+      {\Large \@author\par}
+      \vfill
+    \fi
+  \end{titlepage}%
+}
+\makeatother

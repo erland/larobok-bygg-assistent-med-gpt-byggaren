@@ -1,0 +1,6 @@
+body { font-family: sans-serif; line-height: 1.5; }
+h1 { page-break-before: always; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border-bottom: 1px solid #bbb; padding: 6px; vertical-align: top; }
+pre { border: 1px solid #aaa; padding: 8px; white-space: pre-wrap; }
+img { max-width: 100%; }

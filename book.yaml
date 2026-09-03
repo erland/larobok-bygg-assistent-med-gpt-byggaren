@@ -1,0 +1,10 @@
+title: "Bygg din egen AI-assistent med GPT Byggaren"
+subtitle: "Från idé till fungerande GPT – utan att behöva bli expert på promptdesign och GPT-arkitektur"
+author: "Erland Lindmark"
+language: "sv-SE"
+version: "0.1.0"
+book_type: "praktisk faktabok"
+difficulty: "nybörjare/grundnivå"
+primary_runtime: "GPT Byggaren i Chat-läge"
+
+cover_image: "assets/cover/cover-front.png"

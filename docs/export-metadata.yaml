@@ -1,0 +1,22 @@
+title: "Bygg din egen AI-assistent med GPT Byggaren"
+subtitle: "Från idé till fungerande GPT – utan att behöva bli expert på promptdesign och GPT-arkitektur"
+author: "Erland Lindmark"
+language: "sv-SE"
+identifier: "bygg-din-egen-ai-assistent-med-gpt-byggaren"
+version: "0.1.0"
+date: "2026-09-03"
+cover_image: "assets/cover/cover-front.png"
+rights: "Copyright © 2026 Erland Lindmark"
+chapters:
+  - chapters/00-inledning.md
+  - chapters/vad-ar-en-ai-assistent-01.md
+  - chapters/fran-problem-till-gpt-ide-02.md
+  - chapters/gpt-byggaren-03.md
+  - chapters/bygg-din-forsta-gpt-04.md
+  - chapters/vad-gpt-byggaren-bygger-05.md
+  - chapters/testa-och-forbattra-06.md
+  - chapters/fran-experiment-till-assistent-07.md
+export:
+  epub_toc_depth: 1
+  pdf_toc_depth: 1
+  visible_epub_toc_chapter: false
