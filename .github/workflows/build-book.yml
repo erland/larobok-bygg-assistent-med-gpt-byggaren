@@ -1,0 +1,62 @@
+name: Build book
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build-book:
+    name: Build PDF and EPUB
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Pandoc and XeLaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            pandoc \
+            texlive-xetex \
+            texlive-latex-extra \
+            texlive-fonts-recommended
+
+      - name: Build PDF and EPUB
+        run: ./scripts/export-book.sh
+
+      - name: Verify generated files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s exports/bygg-din-egen-ai-assistent-med-gpt-byggaren.pdf
+          test -s exports/bygg-din-egen-ai-assistent-med-gpt-byggaren.epub
+          ls -lh exports/bygg-din-egen-ai-assistent-med-gpt-byggaren.{pdf,epub}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-${{ github.event.release.tag_name || github.run_number }}
+          path: |
+            exports/bygg-din-egen-ai-assistent-med-gpt-byggaren.pdf
+            exports/bygg-din-egen-ai-assistent-med-gpt-byggaren.epub
+          if-no-files-found: error
+
+      - name: Attach files to GitHub Release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            exports/bygg-din-egen-ai-assistent-med-gpt-byggaren.pdf \
+            exports/bygg-din-egen-ai-assistent-med-gpt-byggaren.epub \
+            --clobber
